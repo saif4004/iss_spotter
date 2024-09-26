@@ -1,16 +1,7 @@
 const { error } = require('console');
 const needle = require('needle');
-/**
- * Makes a single API request to retrieve the user's IP address.
- * Input:
- *   - A callback (to pass back an error or the IP string)
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The IP address as a string (null if error). Example: "162.245.144.188"
- */
 
 const fetchMyIP = function(callback) {
-  // use request to fetch IP address from JSON API
   needle.get('https://api.ipify.org?format=json', (error,response,body) => {
     if (error) {
       return callback(error);
@@ -43,6 +34,25 @@ const fetchCoordsByIP = function(ip,callback) {
     callback(null,{latitude, longitude});
   });
 };
+
+
+const fetchISSFlyOverTimes = function(coords, callback) {
+
+  needle.get(`https://iss-flyover.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      callback(Error(`Status Code ${response.statusCode} when fetching ISS pass times: ${body}`), null);
+      return;
+    }
+    callback(null, body.response);
+  });
+
+};
 module.exports = {
   fetchMyIP,
-  fetchCoordsByIP };
+  fetchCoordsByIP,
+  fetchISSFlyOverTimes };
